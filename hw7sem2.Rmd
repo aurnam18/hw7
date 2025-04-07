@@ -1,0 +1,123 @@
+---
+title: "homework_7"
+author: "Aurna Mukherjee (am96848)"
+date: "2025-04-02"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE, results='hide'}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(kableExtra)
+library(mosaic)
+library(MatchIt)
+```
+
+# **Problem 1**
+
+The formula for standard error in a difference of proportions is sqrt((p1\*(1-p1)/n1) + (p2-(1-p2)/n2))
+
+```{r echo=FALSE}
+library(readr)
+armfold <- read_csv("armfold.csv")
+
+#using prop.test
+male <- subset(armfold, Sex=="Male")
+nrow(male)
+left_male_prop <- prop.test(~LonR_fold, data=male)
+
+female <- subset(armfold, Sex=="Female")
+nrow(female)
+left_female_prop <- prop.test(~LonR_fold, data=female)
+
+diffprop( ~ LonR_fold | Sex, data = armfold ) #difference in proportions
+
+#Part C
+prop.test((LonR_fold == 1) ~ Sex, data=armfold)
+
+# Part C: Compute standard error
+std_error <- sqrt((left_male * (1 - left_male) / num_male) + 
+                  (left_female * (1 - left_female) / num_female))
+
+lower_bound <- diff - 1.96 * std_error
+upper_bound <- diff + 1.96 * std_error
+```
+
+The formula for standard error in a difference of proportions is sqrt((p1\*(1-p1)/n1) + (p2-(1-p2)/n2))
+
+The Z-Value taken here is 1.96, because it captures a 95% confidence interval
+
+The values plugged in are the proportion of left males and number of males, as well as the proportion of left females and the number of left females.
+
+Part D: If we were to repeat this experiment over again multiple times, then we would expect that 95% of those intervals would contain the true difference in population proportions.
+
+Part E: The standard error represents the standard deviation of the sampling distribution – it is essentially a measure of variation due to random chance between both populations.
+
+Part F: The sampling distribution refers to the distribution of the difference of proportions if we were to repeatedly take random samples of the male and female populations and calculated the proportion of each group that folds their left hand on top. The sample/population size is fixed, and the population proportion would be fixed. The sample proportions, and thereby the difference in sample proportions would vary. The standard error would also change since it is based on the sample proportions.
+
+Part G: The central limit theorem, which emphasizes that if the take enough random samples of a population, the distribution of the sample means/proportions will be approximately normal.
+
+Part H: We can't be sure of this. Since the confidence interval has 0 in it, there isn't sufficient evidence of a sex difference in left arm folding, so we can't conclude this. However, we also can't rule it out.
+
+Part I: Yes, the confidence intervals will be different because there will be random variation.
+
+# **Problem 2**
+
+```{r echo=FALSE}
+library(readr)
+turnout <- read_csv("turnout.csv")
+
+#Part A w prop.test
+call <- subset(turnout, GOTV_call==1)
+prop_1998_call <- prop.test(~voted1998, data=call)
+
+not_call <- subset(turnout, GOTV_call==0)
+prop_1998_notcall <- prop.test(~voted1998, data=not_call)
+
+diffprop( ~ voted1998 | GOTV_call, data = turnout ) #difference in proportions
+```
+
+We have calculated the proportion of those who have received a government call and voted in 1998, and those that did not receive a call and voted. We also calculated the difference. Onto Part B, there are different ways that this can be approached. The first is through linear regression:
+
+```{r echo=FALSE}
+#Part B revised
+t.test(voted1996~GOTV_call, data=turnout) #mean in group 0 much more than mean in group 1, and confidence interval does not contain 0
+t.test(MAJORPTY~GOTV_call, data=turnout) #mean in group 1 about double mean in group 1, and confidence interval does not contain 0
+t.test(AGE~GOTV_call, data=turnout)
+
+prop.test((voted1998 == 1) ~ GOTV_call, data=turnout) 
+```
+
+The means in group 1 and group 2 for the first t-test indicate that those who received a government call had more likely voted in 1996. The mean is higher in group 1 than group 2 for MAJORPTY, indicating that those belonging to a major party were more likely to receive a government call. From the t-test for age, we can see that the mean in group 0 is lower than that of group 1, so being older makes people more likely to get a call. The confidence interval does not contain 0, meaning it is statistically significant for all these variables.
+
+Matched dataset generation (and confidence intervals):
+
+```{r echo=FALSE}
+#Part C
+govt_match = matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY, data = turnout, ratio=5)
+summary(govt_match)
+govt_matched <- match.data(govt_match)
+t.test(voted1996~GOTV_call, data=govt_matched) #confidence interval includes 0, not statistically significant
+t.test(AGE~GOTV_call, data=govt_matched) #confidence interval includes 0, not statistically significant
+t.test(MAJORPTY~GOTV_call, data=govt_matched) #confidence interval includes 0, not statistically significant
+```
+
+As we can identify, all of these confidence intervals contain 0, meaning that they are not statistically significant (in this case they are not confounding variables). The summary also shows that the dataset is balanced.
+
+Matched dataset calculations:
+
+```{r}
+call_match <- subset(govt_matched, GOTV_call==1)
+prop_1998_call_match <- prop.test(~voted1998, data=call_match)
+
+not_call_match <- subset(govt_matched, GOTV_call==0)
+prop_1998_notcall_match <- prop.test(~voted1998, data=not_call_match)
+
+diffprop( ~ voted1998 | GOTV_call, data = govt_matched ) #difference in proportions
+prop.test((voted1998 == 1) ~ GOTV_call, data=govt_matched) #95 percent confidence interval does not contain 0 so not statistically significant
+```
+
+Government calls may have increased the likelihood of voting in 1998, but since our confidence interval contains 0, we cannot be sure of this. There isn't sufficient evidence that government calls increased the likelihood of voting in 1998.
