@@ -1,7 +1,7 @@
 ---
 title: "homework_7"
 author: "Aurna Mukherjee (am96848)"
-date: "2025-04-02"
+date: "2025-04-06"
 output:
   html_document: default
   pdf_document: default
@@ -28,21 +28,21 @@ armfold <- read_csv("armfold.csv")
 
 #using prop.test
 male <- subset(armfold, Sex=="Male")
-nrow(male)
+num_male <- nrow(male)
 left_male_prop <- prop.test(~LonR_fold, data=male)
 
 female <- subset(armfold, Sex=="Female")
-nrow(female)
+num_female <- nrow(female)
 left_female_prop <- prop.test(~LonR_fold, data=female)
 
-diffprop( ~ LonR_fold | Sex, data = armfold ) #difference in proportions
+diff <- diffprop( ~ LonR_fold | Sex, data = armfold ) #difference in proportions
 
 #Part C
 prop.test((LonR_fold == 1) ~ Sex, data=armfold)
 
 # Part C: Compute standard error
-std_error <- sqrt((left_male * (1 - left_male) / num_male) + 
-                  (left_female * (1 - left_female) / num_female))
+std_error <- sqrt((0.4716981  * (1 - 0.4716981) / num_male) + 
+                  (0.4234234  * (1 - 0.4234234) / num_female))
 
 lower_bound <- diff - 1.96 * std_error
 upper_bound <- diff + 1.96 * std_error
