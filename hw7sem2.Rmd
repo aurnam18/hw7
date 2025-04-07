@@ -7,6 +7,8 @@ output:
   pdf_document: default
 ---
 
+[Link to Github](https://github.com/aurnam18/hw7)
+
 ```{r setup, include=FALSE, results='hide'}
 knitr::opts_chunk$set(echo = FALSE)
 library(ggplot2)
