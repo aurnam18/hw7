@@ -90,7 +90,7 @@ t.test(voted1996~GOTV_call, data=turnout) #mean in group 0 much more than mean i
 t.test(MAJORPTY~GOTV_call, data=turnout) #mean in group 1 about double mean in group 1, and confidence interval does not contain 0
 t.test(AGE~GOTV_call, data=turnout)
 
-prop.test((voted1998 == 1) ~ GOTV_call, data=turnout) 
+prop.test(voted1998 ~ GOTV_call, data=turnout) 
 ```
 
 The means in group 1 and group 2 for the first t-test indicate that those who received a government call had more likely voted in 1996. The mean is higher in group 1 than group 2 for MAJORPTY, indicating that those belonging to a major party were more likely to receive a government call. From the t-test for age, we can see that the mean in group 0 is lower than that of group 1, so being older makes people more likely to get a call. The confidence interval does not contain 0, meaning it is statistically significant for all these variables.
@@ -119,7 +119,7 @@ not_call_match <- subset(govt_matched, GOTV_call==0)
 prop_1998_notcall_match <- prop.test(~voted1998, data=not_call_match)
 
 diffprop( ~ voted1998 | GOTV_call, data = govt_matched ) #difference in proportions
-prop.test((voted1998 == 1) ~ GOTV_call, data=govt_matched) #95 percent confidence interval does not contain 0 so not statistically significant
+prop.test(voted1998 ~ GOTV_call, data=govt_matched) #95 percent confidence interval does not contain 0 so not statistically significant
 ```
 
-Government calls may have increased the likelihood of voting in 1998, but since our confidence interval contains 0, we cannot be sure of this. There isn't sufficient evidence that government calls increased the likelihood of voting in 1998.
+We are 95% certain government calls have increased the likelihood of voting in 1998, as we can see that the confidence interval does not contain 0.
